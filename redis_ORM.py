@@ -150,8 +150,12 @@ def add_conf(conf_info=None, host=DEFAULT_HOST, port=DEFAULT_PORT):
     pipe = connection.pipeline()
     conf_id = conf_info['conf_id']
     set_conf_id(conf_id, connection=pipe)
-    set_options_for_conf(conf_id, conf_info['conf_options'], connection=pipe)
-    set_filter_for_conf(conf_id, conf_info['conf_themes'], connection=pipe)
+    if conf_info.get('conf_options') is not None:
+        set_options_for_conf(conf_id, conf_info['conf_options'], connection=pipe)
+    else:
+        set_options_for_conf(conf_id, connection=pipe)
+    if conf_info.get('conf_themes') is not None:
+        set_filter_for_conf(conf_id, conf_info['conf_themes'], connection=pipe)
     return pipe.execute()
 
 @decorator_connection
@@ -160,9 +164,11 @@ def set_conf_id(conf_id=None, connection=None, host=None, port=None):
         return connection.sadd('confs', *conf_id)
     elif type(conf_id) in [str, int]:
         return connection.sadd('confs', conf_id)
+    else:
+        return -1
 
 @decorator_connection
-def set_options_for_conf(conf_id=None, conf_options=000, connection=None, host=None, port=None):
+def set_options_for_conf(conf_id=None, conf_options='000', connection=None, host=None, port=None):
     return connection.set(f'conf:{conf_id}:options', conf_options)
 
 @decorator_connection
