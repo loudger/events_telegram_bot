@@ -69,8 +69,8 @@ class admin_interface:
         return result
 
     @staticmethod
-    def get_conf_filter(conf_id):
-        result = redis_ORM.get_conf_filter(conf_id)
+    def get_conf_themes(conf_id):
+        result = redis_ORM.get_conf_themes(conf_id)
         return result
 
 
@@ -128,8 +128,8 @@ class admin_interface:
         return result
 
     @staticmethod
-    def set_filter_for_conf(conf_id, conf_filter):
-        result = redis_ORM.set_filter_for_conf(conf_id, conf_filter)
+    def set_themes_for_conf(conf_id, conf_themes):
+        result = redis_ORM.set_themes_for_conf(conf_id, conf_themes)
         return result
 
     @staticmethod
@@ -145,6 +145,11 @@ class admin_interface:
     @staticmethod
     def set_user_remind_for_event(event_id, user_id):
         result = redis_ORM.set_user_remind_for_event(event_id, user_id)
+        return result
+
+    @staticmethod
+    def add_new_theme(theme):
+        result = redis_ORM.add_new_theme(theme)
         return result
 
 
@@ -168,5 +173,7 @@ class admin_interface:
         result = redis_ORM.del_user_remind_for_event(event_id ,user_id)
         return result
 
-
-    
+    @staticmethod
+    def del_theme(theme):
+        result = redis_ORM.del_theme(theme)
+        return result

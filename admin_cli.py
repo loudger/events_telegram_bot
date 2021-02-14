@@ -122,13 +122,13 @@ class bot_shell(cmd.Cmd):
         except IndexError:
             print('Incorrect parametrs')
 
-    def do_get_conf_filter(self, args):
-        '''get conf filter
-        get_conf_filter <conf_id>'''
+    def do_get_conf_themes(self, args):
+        '''get conf themes
+        get_conf_themes <conf_id>'''
         args = self.parse_arg(args)
         try:
             conf_id = args[0]
-            result = admin_interface.get_conf_filter(conf_id)
+            result = admin_interface.get_conf_themes(conf_id)
             print(result)
         except IndexError:
             print('Incorrect parametrs')
@@ -256,14 +256,14 @@ class bot_shell(cmd.Cmd):
         except IndexError:
             print('Incorrect parametrs')
 
-    def do_set_filter_for_conf(self, args):
-        '''set filter for conf by conf_id.
-        set_filter_for_conf <conf_id> <conf_filter>'''
+    def do_set_themes_for_conf(self, args):
+        '''set themes for conf by conf_id.
+        set_themes_for_conf <conf_id> <conf_themes>'''
         args = self.parse_arg(args)
         try:
             conf_id = args[0]
-            conf_filter = args[1]
-            result = admin_interface.set_filter_for_conf(conf_id, conf_filter)
+            conf_themes = args[1]
+            result = admin_interface.set_themes_for_conf(conf_id, conf_themes)
             print(result)
         except IndexError:
             print('Incorrect parametrs')
@@ -283,7 +283,7 @@ class bot_shell(cmd.Cmd):
 
     def do_set_user_for_event(self, args):
         '''set user for event by event_id.
-        set_filter_for_conf <event_id> <user_id>'''
+        set_user_for_event <event_id> <user_id>'''
         args = self.parse_arg(args)
         try:
             event_id = args[0]
@@ -301,6 +301,15 @@ class bot_shell(cmd.Cmd):
             event_id = args[0]
             user_id = args[1]
             result = admin_interface.set_user_remind_for_event(event_id, user_id)
+            print(result)
+        except IndexError:
+            print('Incorrect parametrs')
+
+    def do_add_new_theme(self, args):
+        args = self.parse_arg(args)
+        try:
+            theme = args
+            result = admin_interface.add_new_theme(theme)
             print(result)
         except IndexError:
             print('Incorrect parametrs')
@@ -351,6 +360,16 @@ class bot_shell(cmd.Cmd):
             print(result)
         except IndexError:
             print('Incorrect parametrs')
+
+    def do_del_theme(self, args):
+        args = self.parse_arg(args)
+        try:
+            theme = args[0]
+            result = admin_interface.del_theme(theme)
+            return result
+        except IndexError:
+            print('Incorrect parametrs')
+
 
 if __name__ == '__main__':
     bot_shell().cmdloop()
