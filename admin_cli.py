@@ -141,7 +141,7 @@ class bot_shell(cmd.Cmd):
         args = self.parse_arg(args)
         try:
             event_info = {'event_id':args[0],'event_name':args[1],'event_descr':args[2],
-            'event_url':args[4],'event_date':args[5],'event_theme':args[6:]}
+            'event_url':args[3],'event_date':args[4],'event_theme':args[5:]}
             result = admin_interface.add_event(event_info)
             print(result)
         except IndexError:
