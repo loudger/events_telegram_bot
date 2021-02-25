@@ -1,4 +1,4 @@
-from admin_API import admin_interface
+from .admin_API import admin_interface
 import pytest
 
 event_info = {'event_id':'test_id','event_name':'test_name','event_descr':'test_descr',

@@ -1,0 +1,1 @@
+from .admin_cli import bot_shell

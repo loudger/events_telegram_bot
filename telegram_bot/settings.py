@@ -5,4 +5,4 @@ default_host = '0.0.0.0'
 default_port = '7979'
 
 
-telebot_token = 'XXXXXXXXXXXXXXXXX'
+telebot_token = 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXX'

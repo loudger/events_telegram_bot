@@ -75,7 +75,10 @@ def send_menu(message):
 @bot.message_handler(commands=['event'])
 def send_event_info(message):
     chat_id = message.chat.id
-    event_id = 'velopark'
+    # event_id = 'velopark'
+    # event_id = '00000000'
+    # event_id = '8892929292'
+    event_id = '101011101'
     # keyboard = types.InlineKeyboardMarkup()
     # keyboard.add(types.InlineKeyboardButton(text="Вкл/выкл бота",callback_data='off_on_bot'))
     # keyboard.add(types.InlineKeyboardButton(text="Вкл/выкл платные мероприятия",callback_data='off_on_cost'))
@@ -223,7 +226,7 @@ def callback_inline(call):
     elif call.data == 'filter_themes_menu_button':
         bot.send_message(call.message.chat.id, 'поменять темы')
     elif call.data.startswith('user_go_event_button:'):
-        event_id = call.message.chat.id, call.data.split(':')[1]
+        event_id = call.data.split(':')[1]
         user_id = call.from_user.id
         result = requests_client_interface.set_user_for_event(event_id, user_id)['result']
         if result == 1:
@@ -234,7 +237,7 @@ def callback_inline(call):
             bot.answer_callback_query(callback_query_id=call.id, text='Просим прощение, в данным момент это невозможно.')
 
     elif call.data.startswith('user_doesnt_go_event_button:'):
-        event_id = call.message.chat.id, call.data.split(':')[1]
+        event_id = call.data.split(':')[1]
         user_id = call.from_user.id
         result = requests_client_interface.del_user_for_event(event_id, user_id)['result']
         if 1 in result:
@@ -245,7 +248,7 @@ def callback_inline(call):
             bot.answer_callback_query(callback_query_id=call.id, text='Просим прощение, в данным момент это невозможно.')
 
     elif call.data.startswith('remind_user_go_event_button:'):
-        event_id = call.message.chat.id, call.data.split(':')[1]
+        event_id = call.data.split(':')[1]
         user_id = call.from_user.id
         result = requests_client_interface.set_user_remind_for_event(event_id, user_id)['result']
         if result == 1:

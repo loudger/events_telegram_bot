@@ -1,4 +1,4 @@
-from admin_API import admin_interface
+from .admin_API import admin_interface
 import cmd
 
 
@@ -306,6 +306,8 @@ class bot_shell(cmd.Cmd):
             print('Incorrect parametrs')
 
     def do_add_new_theme(self, args):
+        '''add new themes, that used for filter events
+        add_new_theme <theme> [<theme> .. <theme>]'''
         args = self.parse_arg(args)
         try:
             theme = args
@@ -362,6 +364,8 @@ class bot_shell(cmd.Cmd):
             print('Incorrect parametrs')
 
     def do_del_theme(self, args):
+        '''del themes, that used for filter events
+        del_theme <theme>'''
         args = self.parse_arg(args)
         try:
             theme = args[0]
