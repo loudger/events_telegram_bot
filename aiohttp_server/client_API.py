@@ -119,7 +119,7 @@ class client_interface:
         if conf_themes:
             conf_info['conf_themes'] = conf_themes
         result = redis_ORM.add_conf(conf_info)
-        result_json = {'conf_info': list(result)}
+        result_json = {'result': result}
         return web.json_response(result_json)
 
     # def set_conf_id(conf_id):
@@ -154,7 +154,7 @@ class client_interface:
         event_id = request.query['event_id']
         user_id = request.query.getall('user_id')
         result = redis_ORM.set_user_for_event(event_id, user_id)
-        result_json = {'result': str(result)}
+        result_json = {'result': result}
         return web.json_response(result_json)
 
     @staticmethod
@@ -162,7 +162,60 @@ class client_interface:
         event_id = request.query['event_id']
         user_id = request.query.getall('user_id')
         result = redis_ORM.set_user_remind_for_event(event_id, user_id)
-        result_json = {'result': str(result)}
+        result_json = {'result': result}
+        return web.json_response(result_json)
+
+    @staticmethod
+    def change_option_bot_active_for_conf(request: web.Request):
+        change_opt = {'0':'1', '1':'0'}
+        conf_id = request.query['conf_id']
+        conf_options = redis_ORM.get_conf_options(conf_id=conf_id)
+        new_opt = change_opt[conf_options[0]]
+        conf_options= change_opt[conf_options[0]]+conf_options[1:]
+        result = redis_ORM.set_options_for_conf(conf_id, conf_options)
+        result_json = {'result': str(result), 'new_opt': new_opt}
+        return web.json_response(result_json)
+
+    @staticmethod
+    def change_option_event_cost_for_conf(request: web.Request):
+        change_opt = {'0':'1', '1':'0'}
+        conf_id = request.query['conf_id']
+        conf_options = redis_ORM.get_conf_options(conf_id=conf_id)
+        new_opt = change_opt[conf_options[1]]
+        conf_options = conf_options[0]+new_opt+conf_options[2]
+        result = redis_ORM.set_options_for_conf(conf_id, conf_options)
+        result_json = {'result': str(result), 'new_opt': new_opt}
+        return web.json_response(result_json)
+
+    @staticmethod
+    def change_option_filter_themes_for_conf(request: web.Request):
+        change_opt = {'0':'1', '1':'0'}
+        conf_id = request.query['conf_id']
+        conf_options = redis_ORM.get_conf_options(conf_id=conf_id)
+        new_opt = change_opt[conf_options[2]]
+        conf_options = conf_options[:2]+new_opt
+        result = redis_ORM.set_options_for_conf(conf_id, conf_options)
+        result_json = {'result': str(result), 'new_opt': new_opt}
+        return web.json_response(result_json)
+
+    @staticmethod
+    def check_conf_exist(request: web.Request):
+        conf_id = request.query['conf_id']
+        result = redis_ORM.get_all_confs()
+        if conf_id in result:
+            result_json = {'result': 1}
+        else:
+            result_json = {'result': 0}
+        return web.json_response(result_json)
+
+    @staticmethod
+    def check_event_exist(request: web.Request):
+        event_id = request.query['event_id']
+        result = redis_ORM.get_all_events()
+        if event_id in result:
+            result_json = {'result': 1}
+        else:
+            result_json = {'result': 0}
         return web.json_response(result_json)
 
     # def add_new_theme(request: web.Request, theme):
@@ -176,7 +229,7 @@ class client_interface:
         event_id = request.query['event_id']
         user_id = request.query.getall('user_id')
         result = redis_ORM.del_user_for_event(event_id ,user_id)
-        result_json = {'result': str(result)}
+        result_json = {'result': result}
         return web.json_response(result_json)
 
     @staticmethod
@@ -184,7 +237,7 @@ class client_interface:
         event_id = request.query['event_id']
         user_id = request.query.getall('user_id')
         result = redis_ORM.del_user_remind_for_event(event_id ,user_id)
-        result_json = {'result': str(result)}
+        result_json = {'result': result}
         return web.json_response(result_json)
 
     # def del_theme(request: web.Request, theme):

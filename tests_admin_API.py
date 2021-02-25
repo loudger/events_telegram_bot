@@ -33,14 +33,13 @@ def test_cleare_db_start():
 
 def test_success_add_event():
     result = admin_interface.add_event(event_info)
-    expression = result == [True, True, True, True, 1]
     all_events = admin_interface.get_all_events()
     event_name = admin_interface.get_event_name('test_id')
     event_descr = admin_interface.get_event_descr('test_id')
     event_url = admin_interface.get_event_url('test_id')
     event_date = admin_interface.get_event_date('test_id')
     event_theme = admin_interface.get_event_theme('test_id')
-    expression = expression and event_info['event_id'] in all_events and\
+    expression = result == 1 and event_info['event_id'] in all_events and\
         event_info['event_name'] == event_name and\
         event_info['event_descr'] == event_descr and\
         event_info['event_url'] == event_url and\
@@ -100,7 +99,7 @@ def test_success_add_conf():
     result = admin_interface.add_conf(conf_info)
     all_confs = admin_interface.get_all_confs()
     conf_options = admin_interface.get_conf_options(conf_info['conf_id'])
-    assert result == [True] and conf_info['conf_id'] in all_confs and\
+    assert result == 1 and conf_info['conf_id'] in all_confs and\
         conf_info['conf_options'] == conf_options
 
 def test_error_add_conf():

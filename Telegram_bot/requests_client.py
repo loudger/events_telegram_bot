@@ -109,6 +109,39 @@ class requests_client_interface:
         result = requests.post(f'{protocol}://{default_host}:{default_port}/set_themes_for_conf', params=params)
         return result.json()
 
+    @classmethod
+    def check_conf_exist(cls, conf_id):
+        params = {'conf_id':conf_id}
+        result = requests.get(f'{protocol}://{default_host}:{default_port}/check_conf_exist', params=params)
+        return result.json()
+
+    @classmethod
+    def check_event_exist(cls, event_id):
+        params = {'event_id':event_id}
+        result = requests.get(f'{protocol}://{default_host}:{default_port}/check_event_exist', params=params)
+        return result.json()
+
+    @classmethod
+    def change_option_bot_active_for_conf(cls, conf_id):
+        params = {'conf_id':conf_id}
+        result = requests.post(f'{protocol}://{default_host}:{default_port}/change_option_bot_active_for_conf', params=params)
+        return result.json()
+
+    @classmethod
+    def change_option_event_cost_for_conf(cls, conf_id):
+        params = {'conf_id':conf_id}
+        result = requests.post(f'{protocol}://{default_host}:{default_port}/change_option_event_cost_for_conf', params=params)
+        return result.json()
+
+    @classmethod
+    def change_option_filter_themes_for_conf(cls, conf_id):
+        params = {'conf_id':conf_id}
+        result = requests.post(f'{protocol}://{default_host}:{default_port}/change_option_filter_themes_for_conf', params=params)
+        return result.json()
+
+
+
+
     # @classmethod
     # def set_subconf_for_conf_event(cls, conf_id, event_id, subconf_url):
     #     params = {'conf_id':conf_id, 'event_id':event_id, 'subconf_url':subconf_url}

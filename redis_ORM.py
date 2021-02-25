@@ -107,7 +107,9 @@ def add_event(event_info=None, **kwargs):
         set_event_url(event_id, event_info['event_url'], connection=pipe)
         set_event_date(event_id, event_info['event_date'], connection=pipe)
         set_event_theme(event_id, event_info['event_theme'], connection=pipe)
-        return pipe.execute()
+        pipe.execute()
+        # return pipe.execute()
+        return 1
     return 0
 
 @decorator_connection
@@ -152,7 +154,8 @@ def add_conf(conf_info=None, **kwargs):
             set_options_for_conf(conf_id, connection=pipe)
         if conf_info.get('conf_themes') is not None:
             set_themes_for_conf(conf_id, conf_info['conf_themes'], connection=pipe)
-        return pipe.execute()
+        pipe.execute()
+        return 1
     return 0
 
 @decorator_connection
@@ -204,10 +207,14 @@ def add_new_theme(theme = None, **kwargs):
 
 def del_conf(conf_id=None, **kwargs):
     connection = connection_to_redis(**kwargs)
+    keys_for_delete = connection.keys(f'conf:{conf_id}:*')
     pipe = connection.pipeline()
     pipe.srem(f'confs', conf_id)
-    pipe.delete(f'conf:{conf_id}:options')
-    pipe.delete(f'conf:{conf_id}:themes')
+    # pipe.delete(f'conf:{conf_id}:options')
+    # pipe.delete(f'conf:{conf_id}:themes')
+    # pipe.delete(f'conf:{conf_id}:*')
+    for key_for_delete in keys_for_delete:
+        pipe.delete(key_for_delete)
     return pipe.execute()
 
 def del_event(event_id=None ,**kwargs):
