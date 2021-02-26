@@ -11,12 +11,13 @@ import redis
 # event:<id>:date = ?
 # event:<id>:theme = (theme1, theme2, ... themeL)
 # confs = (id1, id2....idM)
-# conf:<id>:event:<id>:subconf = str_url
-# conf:<id>:options = [0|1][0|1][0|1] // [activate bot][create subconf][filter cost off/on]
+# conf:<id>:options = [0|1][0|1][0|1] // [activate bot][filter cost off/on][filter themes off/on]
 # conf:<id>:themes = (theme1....themeJ)
 # event:<id>:users = (id1, id2....idL)
 # event:<id>:users_remind = (id1, id2....idX)
 # 
+
+# conf:<id>:event:<id>:subconf = str_url // Этот ключ удалён в силу невозможности реализации
 # -------------------------------
 # private methods
 
@@ -83,9 +84,9 @@ def get_event_theme(event_id=None, **kwargs):
     connection = connection_to_redis(**kwargs)
     return connection.smembers(f'event:{event_id}:theme')
 
-def get_subconf_by_conf_event(conf_id=None, event_id=None,**kwargs):
-    connection = connection_to_redis(**kwargs)
-    return connection.get(f'conf:{conf_id}:event:{event_id}:subconf')
+# def get_subconf_by_conf_event(conf_id=None, event_id=None,**kwargs):
+#     connection = connection_to_redis(**kwargs)
+#     return connection.get(f'conf:{conf_id}:event:{event_id}:subconf')
 
 def get_conf_options(conf_id=None, **kwargs):
     connection = connection_to_redis(**kwargs)
@@ -179,9 +180,9 @@ def set_themes_for_conf(conf_id=None, conf_themes=None, connection=None, **kwarg
     elif type(conf_themes) in [str, int]:
         return connection.sadd(f'conf:{conf_id}:themes', conf_themes)
 
-def set_subconf_for_conf_event(conf_id=None, event_id=None, subconf_url=None, **kwargs):
-    connection = connection_to_redis(**kwargs)
-    return connection.set(f'conf:{conf_id}:event:{event_id}:subconf',subconf_url)
+# def set_subconf_for_conf_event(conf_id=None, event_id=None, subconf_url=None, **kwargs):
+#     connection = connection_to_redis(**kwargs)
+#     return connection.set(f'conf:{conf_id}:event:{event_id}:subconf',subconf_url)
 
 def set_user_for_event(event_id=None, user_id=None, **kwargs):
     connection = connection_to_redis(**kwargs)
@@ -251,3 +252,10 @@ def del_user_remind_for_event(event_id=None ,user_id=None ,**kwargs):
 def del_theme(theme = None,**kwargs):
     connection = connection_to_redis(**kwargs)
     return connection.srem(f'events:themes', theme)
+
+def del_themes_for_conf(conf_id=None, conf_themes=None, **kwargs):
+    connection = connection_to_redis(**kwargs)
+    if type(conf_themes) in [list, set, tuple]:
+        return connection.srem(f'conf:{conf_id}:themes', *conf_themes)
+    elif type(conf_themes) in [str, int]:
+        return connection.srem(f'conf:{conf_id}:themes', conf_themes)

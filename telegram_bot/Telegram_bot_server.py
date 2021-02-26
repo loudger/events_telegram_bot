@@ -1,7 +1,8 @@
-from .requests_client import requests_client_interface
 import telebot
 from telebot import types
+from .requests_client import requests_client_interface
 from . import settings
+
 
 telebot_token = settings.telebot_token
 # aiohttp_call = aiohttp_client_interface.aiohttp_call
@@ -19,7 +20,6 @@ def start(message):
     conf_id = str(message.chat.id)
     conf_options = '100'
     result = requests_client_interface.add_conf(conf_id=conf_id, conf_options=conf_options)['result']
-    # print('result:',result)
     if result == 0:
         bot.send_message(message.chat.id, 'Бот уже работает в этой конференции')
     elif result == 1:
@@ -71,20 +71,14 @@ def send_menu(message):
     bot.send_message(message.chat.id, message_text, reply_markup=keyboard)
 
 
-# def send_event_info(chat_id, event_id):
-@bot.message_handler(commands=['event'])
-def send_event_info(message):
-    chat_id = message.chat.id
+# @bot.message_handler(commands=['event'])
+# def send_event_info(message):
+def send_event_info(chat_id, event_id):
+    # chat_id = message.chat.id
     # event_id = 'velopark'
     # event_id = '00000000'
     # event_id = '8892929292'
-    event_id = '101011101'
-    # keyboard = types.InlineKeyboardMarkup()
-    # keyboard.add(types.InlineKeyboardButton(text="Вкл/выкл бота",callback_data='off_on_bot'))
-    # keyboard.add(types.InlineKeyboardButton(text="Вкл/выкл платные мероприятия",callback_data='off_on_cost'))
-    # keyboard.add(types.InlineKeyboardButton(text="Вкл/выкл подконференции",callback_data='off_on_subconfs'))
-    # keyboard.add(types.InlineKeyboardButton(text="Настроить темы",callback_data='filter_theme'))
-    # bot.send_message(message.chat.id, 'меню бота', reply_markup=keyboard)
+    # event_id = '101011101'
     bot_active_flag, event_cost_flag, filter_themes_flag = requests_client_interface.get_conf_options(chat_id)['conf_options']
     if bot_active_flag == '0':
         bot.send_message(chat_id, 'бот выключен')
@@ -98,7 +92,17 @@ def send_event_info(message):
     event_descr = requests_client_interface.get_event_descr(event_id)['event_descr']
     event_date = requests_client_interface.get_event_date(event_id)['event_date']
     event_url = requests_client_interface.get_event_url(event_id)['event_url']
-    event_theme = requests_client_interface.get_event_theme(event_id)['event_theme']
+    event_theme = requests_client_interface.get_event_theme(event_id)
+
+    if filter_themes_flag == '1':
+        conf_themes = requests_client_interface.get_conf_themes(chat_id)
+        theme_valid = True
+        for conf_theme in conf_themes:
+            if conf_theme in event_theme:
+                theme_valid = False
+        if theme_valid:
+            return None
+
     message_text = f"""Мероприятие {event_name} ({event_date}).
 Описание: {event_descr}
 Ссылка: {event_url}
@@ -196,6 +200,7 @@ def send_event_info(message):
 
 @bot.callback_query_handler(func=lambda call: True)
 def callback_inline(call):
+    # ------------------menu buttons------------------
     if call.data == 'bot_active_button':
         result_dict = requests_client_interface.change_option_bot_active_for_conf(call.message.chat.id)
         if result_dict['result']:
@@ -203,6 +208,8 @@ def callback_inline(call):
                 bot.send_message(call.message.chat.id, '🟢 Бот включён')
             else:
                 bot.send_message(call.message.chat.id, '🔴 Бот выключен')
+ 
+ 
     elif call.data == 'event_cost_button':
         bot.answer_callback_query(callback_query_id=call.id, text='Данная функция ещё недопуступна.\nСкоро будет обновление.')
         # result_dict = requests_client_interface.change_option_event_cost_for_conf(call.message.chat.id)
@@ -212,6 +219,7 @@ def callback_inline(call):
         #     else:
         #         bot.send_message(call.message.chat.id, '🟤 Только бесплатные мероприятия')
 
+ 
     elif call.data == 'filter_themes_button':
         result_dict = requests_client_interface.change_option_filter_themes_for_conf(call.message.chat.id)
         if result_dict['result']:
@@ -223,8 +231,89 @@ def callback_inline(call):
             else:
                 bot.send_message(call.message.chat.id, '🔴 Выключена фильтрация по темам')
 
+    # --------------filter themes menu buttons--------------
+
     elif call.data == 'filter_themes_menu_button':
-        bot.send_message(call.message.chat.id, 'поменять темы')
+        all_themes_list = requests_client_interface.get_all_themes()
+        conf_themes_list = requests_client_interface.get_conf_themes(call.message.chat.id)
+        message_text_list = ['Меню тем:']
+        for theme in all_themes_list:
+            if theme in conf_themes_list:
+                message_text_list.append(f'🟢 {theme}')
+            else:
+                message_text_list.append(f'🔴 {theme}')
+        message_text = '\n'.join(message_text_list)
+        
+        keyboard = types.InlineKeyboardMarkup()
+        keyboard.add(types.InlineKeyboardButton(text="Включить темы",callback_data='on_filter_themes_button'))
+        keyboard.add(types.InlineKeyboardButton(text="Выключить темы",callback_data='off_filter_themes_button'))
+        bot.send_message(call.message.chat.id, message_text, reply_markup=keyboard)
+
+    # ------------add/remove theme for conf button------------
+
+    elif call.data == 'on_filter_themes_button':
+        all_themes_list = requests_client_interface.get_all_themes()
+        conf_themes_list = requests_client_interface.get_conf_themes(call.message.chat.id)
+        message_text = 'Включить темы:'
+
+        keyboard_not_empty = False
+        keyboard = types.InlineKeyboardMarkup()
+        for theme in all_themes_list:
+            if theme not in conf_themes_list:
+                keyboard.add(types.InlineKeyboardButton(text=f"{theme}",callback_data=f'add_theme_for_conf_button:{theme}'))
+                keyboard_not_empty = True
+
+        if keyboard_not_empty:
+            bot.send_message(call.message.chat.id, message_text, reply_markup=keyboard)
+        else:
+            bot.answer_callback_query(callback_query_id=call.id, text='Все темы уже выключены.')
+
+
+    elif call.data == 'off_filter_themes_button':
+        all_themes_list = requests_client_interface.get_all_themes()
+        conf_themes_list = requests_client_interface.get_conf_themes(call.message.chat.id)
+        message_text = 'Выключить темы:'
+
+        keyboard_not_empty = False
+        keyboard = types.InlineKeyboardMarkup()
+        for theme in all_themes_list:
+            if theme in conf_themes_list:
+                keyboard.add(types.InlineKeyboardButton(text=f"{theme}",callback_data=f'delete_theme_for_conf_button:{theme}'))
+                keyboard_not_empty = True
+
+        if keyboard_not_empty:        
+            bot.send_message(call.message.chat.id, message_text, reply_markup=keyboard)
+        else:
+            bot.answer_callback_query(callback_query_id=call.id, text='Все темы уже выключены.')
+
+
+    elif call.data.startswith('add_theme_for_conf_button:'):
+        theme = call.data.split(':')[1]
+
+        result = requests_client_interface.set_themes_for_conf(call.message.chat.id, theme)['result']
+        if result == "1":
+            message_text = f'Тема {theme} теперь включена 🟢'
+            bot.send_message(call.message.chat.id, message_text)
+        elif result == "0":
+            bot.answer_callback_query(callback_query_id=call.id, text='Тема уже включена.')
+        else:
+            bot.answer_callback_query(callback_query_id=call.id, text='Просим прощение, в данным момент это невозможно.')
+
+
+    elif call.data.startswith('delete_theme_for_conf_button:'):
+        theme = call.data.split(':')[1]
+
+        result = requests_client_interface.del_themes_for_conf(call.message.chat.id, theme)['result']
+        if result == "1":
+            message_text = f'Тема {theme} теперь выключена 🔴'
+            bot.send_message(call.message.chat.id, message_text)
+        elif result == "0":
+            bot.answer_callback_query(callback_query_id=call.id, text='Тема уже выключена.')
+        else:
+            bot.answer_callback_query(callback_query_id=call.id, text='Просим прощение, в данным момент это невозможно.')
+
+    # --------------------event buttons--------------------
+
     elif call.data.startswith('user_go_event_button:'):
         event_id = call.data.split(':')[1]
         user_id = call.from_user.id
@@ -247,6 +336,7 @@ def callback_inline(call):
         else:
             bot.answer_callback_query(callback_query_id=call.id, text='Просим прощение, в данным момент это невозможно.')
 
+
     elif call.data.startswith('remind_user_go_event_button:'):
         event_id = call.data.split(':')[1]
         user_id = call.from_user.id
@@ -257,9 +347,10 @@ def callback_inline(call):
             bot.answer_callback_query(callback_query_id=call.id, text='Напоминание уже стоит.')
         else:
             bot.answer_callback_query(callback_query_id=call.id, text='Просим прощение, в данным момент это невозможно.')
+        
 
 
 
-bot.polling(none_stop=True, interval=0)
+# bot.polling(none_stop=True, interval=0)
 
 

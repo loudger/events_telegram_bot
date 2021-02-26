@@ -13,8 +13,8 @@ conf_info = {'conf_id':'test_id','conf_options':'000'}
 conf_info2 = {'conf_id':'test_i2','conf_options':'010', 'conf_themes':'test_theme1'}
 conf_info3 = {'conf_id':'test_id3','conf_options':'101', 'conf_themes':['test_theme1', 'test_theme1']}
 
-subconf_url = 'test_url'
-subconf_url2 = 'test_url2'
+# subconf_url = 'test_url'
+# subconf_url2 = 'test_url2'
 
 user_id = 'test_user_id'
 user_id2 = ['test_user_id', 'test_user_id2']
@@ -132,10 +132,10 @@ def test_reset_themes_for_conf():
     conf_themes = admin_interface.get_conf_themes(conf_info2['conf_id'])
     assert result == 0 and conf_info2['conf_themes'] in conf_themes
 
-def test_set_subconf_for_conf_event():
-    result = admin_interface.set_subconf_for_conf_event(conf_info['conf_id'], event_info['event_id'], subconf_url)
-    sc_url = admin_interface.get_subconf_by_conf_event(conf_info['conf_id'], event_info['event_id'])
-    assert result == 1 and subconf_url == sc_url
+# def test_set_subconf_for_conf_event():
+#     result = admin_interface.set_subconf_for_conf_event(conf_info['conf_id'], event_info['event_id'], subconf_url)
+#     sc_url = admin_interface.get_subconf_by_conf_event(conf_info['conf_id'], event_info['event_id'])
+#     assert result == 1 and subconf_url == sc_url
 
 def test_set_user_for_event():
     result = admin_interface.set_user_for_event(event_info['event_id'], user_id)

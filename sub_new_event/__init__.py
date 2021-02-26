@@ -1,0 +1,1 @@
+from .app import subscribe_to_new_event

@@ -1,5 +1,6 @@
 import redis_ORM
 from aiohttp import web
+from .settings import X_API_Token
 # import json
 
 class client_interface:
@@ -71,16 +72,17 @@ class client_interface:
     def get_event_theme(request: web.Request):
         event_id = request.query['event_id']
         result = redis_ORM.get_event_theme(event_id)
-        result_json = {'event_theme': list(result)}
+        # result_json = {'event_theme': list(result)}
+        result_json = list(result)
         return web.json_response(result_json)
 
-    @staticmethod
-    def get_subconf_by_conf_event(request: web.Request):
-        conf_id = request.query['conf_id']
-        event_id = request.query['event_id']
-        result = redis_ORM.get_subconf_by_conf_event(conf_id, event_id)
-        result_json = {'sub_conf': result}
-        return web.json_response(result_json)
+    # @staticmethod
+    # def get_subconf_by_conf_event(request: web.Request):
+    #     conf_id = request.query['conf_id']
+    #     event_id = request.query['event_id']
+    #     result = redis_ORM.get_subconf_by_conf_event(conf_id, event_id)
+    #     result_json = {'sub_conf': result}
+    #     return web.json_response(result_json)
 
     @staticmethod
     def get_conf_options(request: web.Request):
@@ -93,7 +95,8 @@ class client_interface:
     def get_conf_themes(request: web.Request):
         conf_id = request.query['conf_id']
         result = redis_ORM.get_conf_themes(conf_id)
-        result_json = {'conf_themes': list(result)}
+        # result_json = {'conf_themes': list(result)}
+        result_json = list(result)
         return web.json_response(result_json)
 
     # def add_event(event_info):
@@ -112,6 +115,8 @@ class client_interface:
 
     @staticmethod
     def add_conf(request: web.Request):
+        # conf_id = request.query['x_api_token']
+        
         conf_id = request.query['conf_id']
         conf_options = request.query.get('conf_options', '000')
         conf_themes = request.query.getall('conf_themes', None)
@@ -127,10 +132,14 @@ class client_interface:
     @staticmethod
     def set_options_for_conf(request: web.Request):
         conf_id = request.query['conf_id']
-        conf_options = request.query.get('conf_options', '000')
-        result = redis_ORM.set_options_for_conf(conf_id, conf_options)
-        result_json = {'result': str(result)}
-        return web.json_response(result_json)
+        x_api_token_req = request.headers.get('authorization', None)
+        if x_api_token_req == X_API_Token:
+            conf_options = request.query.get('conf_options', '000')
+            result = redis_ORM.set_options_for_conf(conf_id, conf_options)
+            result_json = {'result': str(result)}
+            return web.json_response(result_json)
+        return web.HTTPBadRequest()
+        
 
     @staticmethod
     def set_themes_for_conf(request: web.Request):
@@ -140,14 +149,14 @@ class client_interface:
         result_json = {'result': str(result)}
         return web.json_response(result_json)
 
-    @staticmethod
-    def set_subconf_for_conf_event(request: web.Request):
-        conf_id = request.query['conf_id']
-        event_id = request.query['event_id']
-        subconf_url = request.query['subconf_url']
-        result = redis_ORM.set_subconf_for_conf_event(conf_id, event_id, subconf_url)
-        result_json = {'result': str(result)}
-        return web.json_response(result_json)
+    # @staticmethod
+    # def set_subconf_for_conf_event(request: web.Request):
+    #     conf_id = request.query['conf_id']
+    #     event_id = request.query['event_id']
+    #     subconf_url = request.query['subconf_url']
+    #     result = redis_ORM.set_subconf_for_conf_event(conf_id, event_id, subconf_url)
+    #     result_json = {'result': str(result)}
+    #     return web.json_response(result_json)
 
     @staticmethod
     def set_user_for_event(request: web.Request):
@@ -238,6 +247,14 @@ class client_interface:
         user_id = request.query.getall('user_id')
         result = redis_ORM.del_user_remind_for_event(event_id ,user_id)
         result_json = {'result': result}
+        return web.json_response(result_json)
+
+    @staticmethod
+    def del_themes_for_conf(request: web.Request):
+        conf_id = request.query['conf_id']
+        conf_themes = request.query['conf_themes']
+        result = redis_ORM.del_themes_for_conf(conf_id, conf_themes)
+        result_json = {'result': str(result)}
         return web.json_response(result_json)
 
     # def del_theme(request: web.Request, theme):

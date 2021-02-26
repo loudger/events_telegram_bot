@@ -58,10 +58,10 @@ class admin_interface:
         result = redis_ORM.get_event_theme(event_id)
         return result
 
-    @staticmethod
-    def get_subconf_by_conf_event(conf_id, event_id):
-        result = redis_ORM.get_subconf_by_conf_event(conf_id, event_id)
-        return result
+    # @staticmethod
+    # def get_subconf_by_conf_event(conf_id, event_id):
+    #     result = redis_ORM.get_subconf_by_conf_event(conf_id, event_id)
+    #     return result
 
     @staticmethod
     def get_conf_options(conf_id):
@@ -132,10 +132,10 @@ class admin_interface:
         result = redis_ORM.set_themes_for_conf(conf_id, conf_themes)
         return result
 
-    @staticmethod
-    def set_subconf_for_conf_event(conf_id, event_id, subconf_url):
-        result = redis_ORM.set_subconf_for_conf_event(conf_id, event_id, subconf_url)
-        return result
+    # @staticmethod
+    # def set_subconf_for_conf_event(conf_id, event_id, subconf_url):
+    #     result = redis_ORM.set_subconf_for_conf_event(conf_id, event_id, subconf_url)
+    #     return result
 
     @staticmethod
     def set_user_for_event(event_id, user_id):

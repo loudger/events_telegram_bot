@@ -99,17 +99,17 @@ class bot_shell(cmd.Cmd):
         except IndexError:
             print('Incorrect parametrs')
 
-    def do_get_subconf_by_conf_event(self, args):
-        '''get subconf by conf and event
-        get_event_theme <conf_id> <event_id>'''
-        args = self.parse_arg(args)
-        try:
-            conf_id = args[0]
-            event_id = args[1]
-            result = admin_interface.get_subconf_by_conf_event(conf_id, event_id)
-            print(result)
-        except IndexError:
-            print('Incorrect parametrs')
+    # def do_get_subconf_by_conf_event(self, args):
+    #     '''get subconf by conf and event
+    #     get_event_theme <conf_id> <event_id>'''
+    #     args = self.parse_arg(args)
+    #     try:
+    #         conf_id = args[0]
+    #         event_id = args[1]
+    #         result = admin_interface.get_subconf_by_conf_event(conf_id, event_id)
+    #         print(result)
+    #     except IndexError:
+    #         print('Incorrect parametrs')
 
     def do_get_conf_options(self, args):
         '''get conf options
@@ -245,7 +245,7 @@ class bot_shell(cmd.Cmd):
         '''set options for conf by conf_id.
         set_options_for_conf <conf_id> <conf_options>
         conf_options = [0|1][0|1][0|1]
-        [activate bot][create subconf][filter cost off/on]
+        [activate bot][filter cost off/on][filter themes off/on]
         for example 000 or 101'''
         args = self.parse_arg(args)
         try:
@@ -268,18 +268,18 @@ class bot_shell(cmd.Cmd):
         except IndexError:
             print('Incorrect parametrs')
 
-    def do_set_subconf_for_conf_event(self, args):
-        '''set subconf for conf by conf_id and event_id.
-        set_subconf_for_conf <conf_id> <event_id> <conf_subconf>'''
-        args = self.parse_arg(args)
-        try:
-            conf_id = args[0]
-            event_id = args[1]
-            subconf_url = args[2]
-            result = admin_interface.set_subconf_for_conf_event(conf_id, event_id, subconf_url)
-            print(result)
-        except IndexError:
-            print('Incorrect parametrs')
+    # def do_set_subconf_for_conf_event(self, args):
+    #     '''set subconf for conf by conf_id and event_id.
+    #     set_subconf_for_conf <conf_id> <event_id> <conf_subconf>'''
+    #     args = self.parse_arg(args)
+    #     try:
+    #         conf_id = args[0]
+    #         event_id = args[1]
+    #         subconf_url = args[2]
+    #         result = admin_interface.set_subconf_for_conf_event(conf_id, event_id, subconf_url)
+    #         print(result)
+    #     except IndexError:
+    #         print('Incorrect parametrs')
 
     def do_set_user_for_event(self, args):
         '''set user for event by event_id.
