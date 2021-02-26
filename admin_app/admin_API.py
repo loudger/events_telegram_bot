@@ -75,10 +75,10 @@ class admin_interface:
 
 
     @staticmethod
-    def add_event(event_info):
+    def add_event(event_info, test = None):
         # event_info = {'event_id':..,'event_name':..,'event_descr':..,
         # 'event_url':..,'event_date':..,'event_theme':..}
-        result = redis_ORM.add_event(event_info)
+        result = redis_ORM.add_event(event_info, test=test)
         return result
 
     @staticmethod

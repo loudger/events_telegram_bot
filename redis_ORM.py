@@ -42,6 +42,13 @@ def decorator_connection(func):
         return func(*args, **kwargs)
     return wrapper
     
+def publish_new_event(event_id, connection, test):
+    if test == True:
+        return None
+    # connection_pub_event = connection.pubsub()
+    connection.publish('new_event', event_id)
+
+
 # -------------------------------
 
 def get_all_confs(**kwargs):
@@ -97,7 +104,7 @@ def get_conf_themes(conf_id=None, **kwargs):
     return connection.smembers(f'conf:{conf_id}:themes')
 
 
-def add_event(event_info=None, **kwargs):
+def add_event(event_info=None, test=None, **kwargs):
     connection = connection_to_redis(**kwargs)
     event_id = event_info['event_id']
     result = set_event_id(event_id, connection=connection)
@@ -110,6 +117,7 @@ def add_event(event_info=None, **kwargs):
         set_event_theme(event_id, event_info['event_theme'], connection=pipe)
         pipe.execute()
         # return pipe.execute()
+        publish_new_event(event_id, connection, test)
         return 1
     return 0
 

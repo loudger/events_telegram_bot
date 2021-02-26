@@ -2,7 +2,29 @@ import telebot
 from telebot import types
 from .requests_client import requests_client_interface
 from . import settings
+from . import small_redis_ORM
 
+help_text = '''После добавления бота в конфу для начала его работы необходимо написать /start
+Данный бот нацелен на нахождение различных мероприятий из интернет ресурсов и оповещение пользователей об этим мероприятиях.
+Доступные команды:
+/help - получение информации о пользованнии ботом;
+/menu - меню бота, с помощью которого можно настроить бота, а также какие именно мероприятия вы хотите видеть.
+
+Настройка бота в меню:
+1. Можно выключить и включить бота.
+2. Можно поставить фильтр только на бесплатные мероприятия (пока недоступно)
+3. Можно настроить темы мероприятий
+
+В случае включенной фильтрации по темам, Вам будут приходить уведомления мероприятий связанные с выбранными темами.
+В случае выключенной фильтрации по темам, Вам будут приходить увидемления обо всех мероприятиях, найденные ботом. 
+
+Когда приходит уведомление от бота по поводу мероприятия, Вы можете:
+1. Нажать "Я пойду". В этом случае бот просто запишет вас в свою базу данных как участника.
+2. Нажать "Напомнить о мероприятии". Бот напишет Вам, когда время мероприятия подойдёт к началу.
+3. Нажать "Я не пойду". Бот удалит вас из своей базы данных как участника, а также не будет уведомлять Вас о начале мероприятия
+
+Вы в любой момент можете передумать и выбрать любой из вариантов.
+'''
 
 telebot_token = settings.telebot_token
 # aiohttp_call = aiohttp_client_interface.aiohttp_call
@@ -25,14 +47,12 @@ def start(message):
     elif result == 1:
         bot.send_message(message.chat.id, '''Бот активирован.
 Введите /help для получения информации,
-/menu для управления ботом,
-/event - тестовая команда''')
+/menu для управления ботом''')
 
 
 @bot.message_handler(commands=['help'])
 def send_help(message):
-    keyboard = types.InlineKeyboardMarkup()
-    bot.send_message(message.chat.id, 'help', reply_markup=keyboard)
+    bot.send_message(message.chat.id, help_text)
 
 
 @bot.message_handler(commands=['menu'])
@@ -71,23 +91,18 @@ def send_menu(message):
     bot.send_message(message.chat.id, message_text, reply_markup=keyboard)
 
 
-# @bot.message_handler(commands=['event'])
-# def send_event_info(message):
 def send_event_info(chat_id, event_id):
-    # chat_id = message.chat.id
-    # event_id = 'velopark'
-    # event_id = '00000000'
-    # event_id = '8892929292'
-    # event_id = '101011101'
     bot_active_flag, event_cost_flag, filter_themes_flag = requests_client_interface.get_conf_options(chat_id)['conf_options']
     if bot_active_flag == '0':
         bot.send_message(chat_id, 'бот выключен')
         return None
 
+    # print('bot activated')
     if requests_client_interface.check_event_exist(event_id)['result'] == 0:
         bot.send_message(chat_id, 'event_id не существует')
         return None
 
+    # print('event exist')
     event_name = requests_client_interface.get_event_name(event_id)['event_name']
     event_descr = requests_client_interface.get_event_descr(event_id)['event_descr']
     event_date = requests_client_interface.get_event_date(event_id)['event_date']
@@ -103,7 +118,11 @@ def send_event_info(chat_id, event_id):
         if theme_valid:
             return None
 
-    message_text = f"""Мероприятие {event_name} ({event_date}).
+    # print('theme on')
+    date_str, time_str = event_date.split(',')
+
+    message_text = f"""Мероприятие {event_name}
+Дата: {date_str.replace('_','.')} и время {time_str.replace('_',':')}.
 Описание: {event_descr}
 Ссылка: {event_url}
 Теги: {','.join(event_theme)}"""
@@ -116,86 +135,13 @@ def send_event_info(chat_id, event_id):
     bot.send_message(chat_id, message_text, reply_markup=keyboard)
 
 
-
-
-    # как отвечать на сообщение
-	# bot.reply_to(message, "Howdy, how are you doing?")
-
-# @bot.message_handler(content_types=['text'])
-# def get_text_messages(message):
-#     # keyboard = types.InlineKeyboardMarkup()
-#     # url_button = types.InlineKeyboardButton(text="Перейти на Яндекс",callback_data='text')
-#     # keyboard.add(url_button)
-#     # bot.send_message(message.chat.id, "Привет! Нажми на кнопку и перейди в поисковик.", reply_markup=keyboard)
-    
-#     # print(type(message))
-#     # print(message)
-#     if message.text.lower() == 'дай':
-#         send_event_info(message.chat.id, 'velopark')
-#     elif message.text.lower() == 'ping':
-#         result = requests_client_interface.ping()
-#         # result = str(result)
-#         bot.send_message(message.chat.id, result)
-
-    # print(type(message.from_user))
-    # if message.text == "Привет":
-    #     bot.send_message(message.from_user.id, "Привет, чем я могу тебе помочь?")
-    # elif message.text == "/help":
-    #     bot.send_message(message.from_user.id, "Напиши привет")
-    # else:
-    #     bot.send_message(message.from_user.id, "Я тебя не понимаю. Напиши /help.")
-    # if message.text == "Привет":
-    #     bot.send_message(message.chat.id, "Привет, чем я могу тебе помочь?")
-    # elif message.text == "/help":
-    #     bot.send_message(message.chat.id, "Напиши привет")
-    # else:
-    #     bot.send_message(message.chat.id, "Я тебя не понимаю. Напиши /help.")
-
-    
-
-    # if message.text in ['/help','/help@besthangout_bot']:
-    #     all_events = redis_ORM.get_all_events()
-    #     bot.send_message(message.chat.id, \
-    #             f'''Записаться на мероприятие:"/b пойду на id_мероприятия"\nДобавить мероприятие:"/b создать id_мероприятия"\nСписок кто записался:"/b кто записался на id_мероприятия"\nДоступные мероприятия {all_events}''', \
-    #             reply_markup=keyboard)
-    # elif message.text.startswith('/b'):
-    #     if message.text.startswith('/b пойду на '):
-    #         event_id = message.text.split()[-1]
-    #         redis_ORM.set_user_for_event(event_id, message.from_user.id)
-    #         bot.send_message(message.chat.id, f'Вы записались на "{event_id}"')
-    #     elif message.text.startswith('/b создать '):
-    #         event_id = message.text.split()[-1]
-    #         redis_ORM.set_event_id(event_id)
-    #         bot.send_message(message.chat.id, f'Добавлено мероприятие "{event_id}"')
-    #     elif message.text.startswith('/b кто записался на '):
-    #         event_id = message.text.split()[-1]
-    #         users_id = redis_ORM.get_users_by_event(event_id)
-    #         bot.send_message(message.chat.id, f'id пользователей, кто идёт на "{event_id}":{users_id}')
-    #     else:
-    #         bot.send_message(message.chat.id, f'Неверная команда. /help')
-
-# def send_event_info(chat_id, event_id):
-#     if event_id in requests_client_interface.get_all_events():
-#         event_name = requests_client_interface.get_event_name(event_id)['event_name']
-#         event_descr = requests_client_interface.get_event_descr(event_id)['event_descr']
-#         event_date = requests_client_interface.get_event_date(event_id)['event_date']
-#         event_url = requests_client_interface.get_event_url(event_id)['event_url']
-#         event_theme = requests_client_interface.get_event_theme(event_id)['event_theme']
-#         message_text = f"""Мероприятие {event_name} ({event_date}).
-# Описание: {event_descr}
-# Ссылка: {event_url}
-# Теги: {','.join(event_theme)}"""
-
-#         keyboard = types.InlineKeyboardMarkup()
-#         url_button = types.InlineKeyboardButton(text="Перейти по ссылке",url=event_url)
-#         keyboard.add(url_button)
-#         url_button = types.InlineKeyboardButton(text="Я пойду",callback_data='user_go_event')
-#         keyboard.add(url_button)
-#     else:
-#         keyboard = types.InlineKeyboardMarkup()
-#         message_text = f"Мероприятиe ({event_id}) не существует"
-#     bot.send_message(chat_id, message_text, reply_markup=keyboard)
-
+def remind_user_about_event(user_id, event_id):
+    # TODO переписать
+    if requests_client_interface.check_event_exist(event_id)['result'] == 0:
+        return None
+    event_name = requests_client_interface.get_event_name(event_id)['event_name']
+    event_url = requests_client_interface.get_event_url(event_id)['event_url']
+    bot.send_message(user_id, f'Событие "{event_name}" начинается!\nСсылка: {event_url}')
 
 
 @bot.callback_query_handler(func=lambda call: True)
@@ -237,6 +183,7 @@ def callback_inline(call):
         all_themes_list = requests_client_interface.get_all_themes()
         conf_themes_list = requests_client_interface.get_conf_themes(call.message.chat.id)
         message_text_list = ['Меню тем:']
+        print('conf_themes_list',conf_themes_list)
         for theme in all_themes_list:
             if theme in conf_themes_list:
                 message_text_list.append(f'🟢 {theme}')
@@ -255,6 +202,7 @@ def callback_inline(call):
         all_themes_list = requests_client_interface.get_all_themes()
         conf_themes_list = requests_client_interface.get_conf_themes(call.message.chat.id)
         message_text = 'Включить темы:'
+        
 
         keyboard_not_empty = False
         keyboard = types.InlineKeyboardMarkup()
@@ -330,7 +278,10 @@ def callback_inline(call):
         user_id = call.from_user.id
         result = requests_client_interface.del_user_for_event(event_id, user_id)['result']
         if 1 in result:
-            bot.answer_callback_query(callback_query_id=call.id, text='Запись и напоминание отменены.')
+            if small_redis_ORM.delete_shedule_messages_by_user_event(user_id, event_id,) == 1:
+                bot.answer_callback_query(callback_query_id=call.id, text='Запись и напоминание отменены.')
+            else:
+                bot.answer_callback_query(callback_query_id=call.id, text='Просим прощение, в данным момент это невозможно.')
         elif result == [0,0]:
             bot.answer_callback_query(callback_query_id=call.id, text='Вы не были записаны на это мероприятие.')
         else:
@@ -342,15 +293,16 @@ def callback_inline(call):
         user_id = call.from_user.id
         result = requests_client_interface.set_user_remind_for_event(event_id, user_id)['result']
         if result == 1:
-            bot.answer_callback_query(callback_query_id=call.id, text='Поставлено напоминание для вас.')
+            date_time = requests_client_interface.get_event_date(event_id)['event_date']
+            if small_redis_ORM.set_shedule_message(user_id, event_id, date_time) == 1:
+                bot.answer_callback_query(callback_query_id=call.id, text='Поставлено напоминание для вас.')
+            else:
+                bot.answer_callback_query(callback_query_id=call.id, text='Просим прощение, в данным момент это невозможно.')
         elif result == 0:
             bot.answer_callback_query(callback_query_id=call.id, text='Напоминание уже стоит.')
         else:
             bot.answer_callback_query(callback_query_id=call.id, text='Просим прощение, в данным момент это невозможно.')
         
 
-
-
-# bot.polling(none_stop=True, interval=0)
 
 

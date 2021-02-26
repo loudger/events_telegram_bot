@@ -12,6 +12,7 @@ class API_methods:
         event_id = request.query['event_id']
         x_api_token_req = request.headers.get('authorization', None)
         if x_api_token_req == X_API_Token:
+            print('coming new event')
             confs_ids = requests_client_interface.get_all_confs()
             for confs_id in confs_ids:
                 try:
@@ -20,6 +21,7 @@ class API_methods:
                     pass
                 except Exception as e:
                     print(e)
+            print('event sended for all confs')
             result_json = {'result': 'OK'}
             return web.json_response(result_json)
         return web.HTTPBadRequest()

@@ -32,7 +32,7 @@ def test_cleare_db_start():
     assert expression == False
 
 def test_success_add_event():
-    result = admin_interface.add_event(event_info)
+    result = admin_interface.add_event(event_info, test=True)
     all_events = admin_interface.get_all_events()
     event_name = admin_interface.get_event_name('test_id')
     event_descr = admin_interface.get_event_descr('test_id')

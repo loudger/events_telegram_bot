@@ -116,24 +116,26 @@ class client_interface:
     @staticmethod
     def add_conf(request: web.Request):
         # conf_id = request.query['x_api_token']
-        
-        conf_id = request.query['conf_id']
-        conf_options = request.query.get('conf_options', '000')
-        conf_themes = request.query.getall('conf_themes', None)
-        conf_info = {'conf_id':conf_id, 'conf_options':conf_options}
-        if conf_themes:
-            conf_info['conf_themes'] = conf_themes
-        result = redis_ORM.add_conf(conf_info)
-        result_json = {'result': result}
-        return web.json_response(result_json)
+        x_api_token_req = request.headers.get('authorization', None)
+        if x_api_token_req == X_API_Token:
+            conf_id = request.query['conf_id']
+            conf_options = request.query.get('conf_options', '000')
+            conf_themes = request.query.getall('conf_themes', None)
+            conf_info = {'conf_id':conf_id, 'conf_options':conf_options}
+            if conf_themes:
+                conf_info['conf_themes'] = conf_themes
+            result = redis_ORM.add_conf(conf_info)
+            result_json = {'result': result}
+            return web.json_response(result_json)
+        return web.HTTPBadRequest()
 
     # def set_conf_id(conf_id):
 
     @staticmethod
     def set_options_for_conf(request: web.Request):
-        conf_id = request.query['conf_id']
         x_api_token_req = request.headers.get('authorization', None)
         if x_api_token_req == X_API_Token:
+            conf_id = request.query['conf_id']
             conf_options = request.query.get('conf_options', '000')
             result = redis_ORM.set_options_for_conf(conf_id, conf_options)
             result_json = {'result': str(result)}
@@ -143,11 +145,14 @@ class client_interface:
 
     @staticmethod
     def set_themes_for_conf(request: web.Request):
-        conf_id = request.query['conf_id']
-        conf_themes = request.query['conf_themes']
-        result = redis_ORM.set_themes_for_conf(conf_id, conf_themes)
-        result_json = {'result': str(result)}
-        return web.json_response(result_json)
+        x_api_token_req = request.headers.get('authorization', None)
+        if x_api_token_req == X_API_Token:
+            conf_id = request.query['conf_id']
+            conf_themes = request.query['conf_themes']
+            result = redis_ORM.set_themes_for_conf(conf_id, conf_themes)
+            result_json = {'result': str(result)}
+            return web.json_response(result_json)
+        return web.HTTPBadRequest()
 
     # @staticmethod
     # def set_subconf_for_conf_event(request: web.Request):
@@ -160,52 +165,67 @@ class client_interface:
 
     @staticmethod
     def set_user_for_event(request: web.Request):
-        event_id = request.query['event_id']
-        user_id = request.query.getall('user_id')
-        result = redis_ORM.set_user_for_event(event_id, user_id)
-        result_json = {'result': result}
-        return web.json_response(result_json)
+        x_api_token_req = request.headers.get('authorization', None)
+        if x_api_token_req == X_API_Token:
+            event_id = request.query['event_id']
+            user_id = request.query.getall('user_id')
+            result = redis_ORM.set_user_for_event(event_id, user_id)
+            result_json = {'result': result}
+            return web.json_response(result_json)
+        return web.HTTPBadRequest()
 
     @staticmethod
     def set_user_remind_for_event(request: web.Request):
-        event_id = request.query['event_id']
-        user_id = request.query.getall('user_id')
-        result = redis_ORM.set_user_remind_for_event(event_id, user_id)
-        result_json = {'result': result}
-        return web.json_response(result_json)
+        x_api_token_req = request.headers.get('authorization', None)
+        if x_api_token_req == X_API_Token:
+            event_id = request.query['event_id']
+            user_id = request.query.getall('user_id')
+            result = redis_ORM.set_user_remind_for_event(event_id, user_id)
+            result_json = {'result': result}
+            return web.json_response(result_json)
+        return web.HTTPBadRequest()
 
     @staticmethod
     def change_option_bot_active_for_conf(request: web.Request):
-        change_opt = {'0':'1', '1':'0'}
-        conf_id = request.query['conf_id']
-        conf_options = redis_ORM.get_conf_options(conf_id=conf_id)
-        new_opt = change_opt[conf_options[0]]
-        conf_options= change_opt[conf_options[0]]+conf_options[1:]
-        result = redis_ORM.set_options_for_conf(conf_id, conf_options)
-        result_json = {'result': str(result), 'new_opt': new_opt}
-        return web.json_response(result_json)
+        x_api_token_req = request.headers.get('authorization', None)
+        if x_api_token_req == X_API_Token:
+            change_opt = {'0':'1', '1':'0'}
+            conf_id = request.query['conf_id']
+            conf_options = redis_ORM.get_conf_options(conf_id=conf_id)
+            new_opt = change_opt[conf_options[0]]
+            conf_options= change_opt[conf_options[0]]+conf_options[1:]
+            result = redis_ORM.set_options_for_conf(conf_id, conf_options)
+            result_json = {'result': str(result), 'new_opt': new_opt}
+            return web.json_response(result_json)
+        return web.HTTPBadRequest()
 
     @staticmethod
     def change_option_event_cost_for_conf(request: web.Request):
-        change_opt = {'0':'1', '1':'0'}
-        conf_id = request.query['conf_id']
-        conf_options = redis_ORM.get_conf_options(conf_id=conf_id)
-        new_opt = change_opt[conf_options[1]]
-        conf_options = conf_options[0]+new_opt+conf_options[2]
-        result = redis_ORM.set_options_for_conf(conf_id, conf_options)
-        result_json = {'result': str(result), 'new_opt': new_opt}
-        return web.json_response(result_json)
+        x_api_token_req = request.headers.get('authorization', None)
+        if x_api_token_req == X_API_Token:
+            change_opt = {'0':'1', '1':'0'}
+            conf_id = request.query['conf_id']
+            conf_options = redis_ORM.get_conf_options(conf_id=conf_id)
+            new_opt = change_opt[conf_options[1]]
+            conf_options = conf_options[0]+new_opt+conf_options[2]
+            result = redis_ORM.set_options_for_conf(conf_id, conf_options)
+            result_json = {'result': str(result), 'new_opt': new_opt}
+            return web.json_response(result_json)
+        return web.HTTPBadRequest()
 
     @staticmethod
     def change_option_filter_themes_for_conf(request: web.Request):
-        change_opt = {'0':'1', '1':'0'}
-        conf_id = request.query['conf_id']
-        conf_options = redis_ORM.get_conf_options(conf_id=conf_id)
-        new_opt = change_opt[conf_options[2]]
-        conf_options = conf_options[:2]+new_opt
-        result = redis_ORM.set_options_for_conf(conf_id, conf_options)
-        result_json = {'result': str(result), 'new_opt': new_opt}
-        return web.json_response(result_json)
+        x_api_token_req = request.headers.get('authorization', None)
+        if x_api_token_req == X_API_Token:
+            change_opt = {'0':'1', '1':'0'}
+            conf_id = request.query['conf_id']
+            conf_options = redis_ORM.get_conf_options(conf_id=conf_id)
+            new_opt = change_opt[conf_options[2]]
+            conf_options = conf_options[:2]+new_opt
+            result = redis_ORM.set_options_for_conf(conf_id, conf_options)
+            result_json = {'result': str(result), 'new_opt': new_opt}
+            return web.json_response(result_json)
+        return web.HTTPBadRequest()
 
     @staticmethod
     def check_conf_exist(request: web.Request):
@@ -235,26 +255,35 @@ class client_interface:
 
     @staticmethod
     def del_user_for_event(request: web.Request):
-        event_id = request.query['event_id']
-        user_id = request.query.getall('user_id')
-        result = redis_ORM.del_user_for_event(event_id ,user_id)
-        result_json = {'result': result}
-        return web.json_response(result_json)
+        x_api_token_req = request.headers.get('authorization', None)
+        if x_api_token_req == X_API_Token:
+            event_id = request.query['event_id']
+            user_id = request.query.getall('user_id')
+            result = redis_ORM.del_user_for_event(event_id ,user_id)
+            result_json = {'result': result}
+            return web.json_response(result_json)
+        return web.HTTPBadRequest()
 
     @staticmethod
     def del_user_remind_for_event(request: web.Request):
-        event_id = request.query['event_id']
-        user_id = request.query.getall('user_id')
-        result = redis_ORM.del_user_remind_for_event(event_id ,user_id)
-        result_json = {'result': result}
-        return web.json_response(result_json)
+        x_api_token_req = request.headers.get('authorization', None)
+        if x_api_token_req == X_API_Token:
+            event_id = request.query['event_id']
+            user_id = request.query.getall('user_id')
+            result = redis_ORM.del_user_remind_for_event(event_id ,user_id)
+            result_json = {'result': result}
+            return web.json_response(result_json)
+        return web.HTTPBadRequest()
 
     @staticmethod
     def del_themes_for_conf(request: web.Request):
-        conf_id = request.query['conf_id']
-        conf_themes = request.query['conf_themes']
-        result = redis_ORM.del_themes_for_conf(conf_id, conf_themes)
-        result_json = {'result': str(result)}
-        return web.json_response(result_json)
+        x_api_token_req = request.headers.get('authorization', None)
+        if x_api_token_req == X_API_Token:
+            conf_id = request.query['conf_id']
+            conf_themes = request.query['conf_themes']
+            result = redis_ORM.del_themes_for_conf(conf_id, conf_themes)
+            result_json = {'result': str(result)}
+            return web.json_response(result_json)
+        return web.HTTPBadRequest()
 
     # def del_theme(request: web.Request, theme):

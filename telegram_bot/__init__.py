@@ -1,3 +1,4 @@
+from .schedule_message import schedule_message_loop
 from .Telegram_bot_server import bot
 from .routes import setup_routes
 from . import settings
@@ -18,7 +19,9 @@ def start_telebot():
         bot.polling(none_stop=True, interval=0)
 
     bot_threding = threading.Thread(target=bot_polling_start)
+    schedule_message_loop_threading = threading.Thread(target=schedule_message_loop)
     bot_threding.start()
+    schedule_message_loop_threading.start()
 
     aiohttp_server_app()
 
